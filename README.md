@@ -1,7 +1,7 @@
 webrtc-multi-connection
 =======================
 
-WebRTC wrapper to enable many one-direction connections
+WebRTC wrapper to enable many one-direction connections.
 
 Launch a demo
 -------------
@@ -20,6 +20,6 @@ $ nodejs serve_static.js
 ```
 This may require additional modules installation, install them with npm.
 
-Now visit http://127.0.0.1/initiator.html and http://127.0.0.1/participant.html in the browser.
+Now visit http://127.0.0.1:8181/initiator.html and http://127.0.0.1:8181/participant.html in the browser.
 
 Have fun!
