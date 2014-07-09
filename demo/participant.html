@@ -13,15 +13,15 @@
 		<script>
 			//window.skipRTCMultiConnectionLogs = true;
 
+			var channelID = 'Bnei Baruch Group Video';
+
 			var video = document.querySelector('video');
-			var stream;
-			var size = {width: 320, height: 240};
+			var size = {width: 640, height: 480};
 			var sessions = {};
 
-			var channelid = 'BB-Group-Video';
-
-			var connection = new RTCMultiConnection(channelid);
-			connection.sessionid = 'virtual-group';
+			var connection = new RTCMultiConnection(channelID);
+            connection.userid = prompt("Please enter your participant ID", 'virtual-group');
+			connection.sessionid = 'awesome-session';
             connection.isInitiator = false;
             connection.preventSSLAutoAllowed = false;
 			connection.autoReDialOnFailure = true;
@@ -35,12 +35,12 @@
                 session.join();
             }
 
-			// On getting local or remote media stream
+			// On getting local media stream
 			connection.onstream = function(e) {
-                console.log("New stream: ", e)
-                video.src = URL.createObjectURL(e.stream)
-				video.play();
-				stream = e.stream;
+                console.log("New stream: ", e);
+                e.stream.muted = true;
+                video.src = URL.createObjectURL(e.stream);
+                video.play();
 			};
 
             connection.onleave = function(e) {
@@ -48,15 +48,13 @@
                 if (e.entireSessionClosed) {
                     var statusContainer = document.querySelector('#js-status-container');
                     statusContainer.innerHTML = "The initiator has left";
+                    // TODO: reconnect on timeout
                 }
-            };
-
-            connection.onSessionClosed = function(e) {
-                console.log("Entire session closed: ", e);
             };
 
 			// Connect to existing session
 			document.querySelector('#js-start-broadcasting-button').onclick = function() {
+                this.disabled = true;
 				connection.connect();
 			};
 
