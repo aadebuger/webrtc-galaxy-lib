@@ -3,7 +3,7 @@ webrtc-multi-connection
 
 WebRTC wrapper to enable many one-direction connections.
 
-Launch a demo
+Launch demo
 -------------
 
 Clone the WebRTC multicionnection repository:
