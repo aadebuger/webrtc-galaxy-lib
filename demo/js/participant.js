@@ -2,6 +2,8 @@
 
 /* TODO: move all WebRTC stuff into a separate library */
 
+var connection;
+
 $(function () {
     //window.skipRTCMultiConnectionLogs = true;
 
@@ -11,7 +13,7 @@ $(function () {
     var size = {width: 320, height: 240};
     var sessions = {};
 
-    var connection = new RTCMultiConnection(channelID);
+    connection = new RTCMultiConnection(channelID);
     connection.userid = prompt("Please enter your participant ID", 'virtual-group');
     connection.sessionid = 'awesome-session';
     connection.isInitiator = false;

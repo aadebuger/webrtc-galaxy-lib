@@ -2,12 +2,13 @@
 
 /* TODO: move all WebRTC stuff into a separate library */
 
+var connection;
 var remoteStreams = {};
 
 $(function () {
     //window.skipRTCMultiConnectionLogs = true;
     var channelID = 'Bnei Baruch Group Video';
-    var connection = new RTCMultiConnection(channelID);
+    connection = new RTCMultiConnection(channelID);
 
     connection.isInitiator = true;
     connection.sessionid = 'awesome-session';
@@ -38,6 +39,7 @@ $(function () {
         console.log("User left: ", e);
         delete remoteStreams[e.userid];
         removeParticipant(e.userid);
+        removeParticipantVideo(e.userid);
     }
 
     connection.onRequest = function (request) {
