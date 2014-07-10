@@ -27,15 +27,11 @@ $(function () {
         console.log("New stream: ", e);
         e.stream.muted = true;
         remoteStreams[e.userid] = e.stream;
+        holdSilently(e.userid);
         enableParticipant(e.userid);
     };
 
     connection.onleave = function(e) {
-        /*if (!!stream) {
-          video.src = null;
-          stream.stop('remote');
-          stream = null;
-          }*/
         console.log("User left: ", e);
         delete remoteStreams[e.userid];
         removeParticipant(e.userid);
@@ -55,6 +51,35 @@ $(function () {
     console.log("Connection opened.");
 
 });
+
+function holdSilently(userID) {
+    toggleHoldSilently(userID, true);
+}
+
+function unholdSilently(userID) {
+    toggleHoldSilently(userID, false);
+}
+
+function toggleHoldSilently(userID, hold) {
+    var peer = connection.peers[userID];
+
+    /* A monkey-patch, see
+     * https://github.com/muaz-khan/WebRTC-Experiment/issues/244
+     * */
+    peer.fireHoldUnHoldEvents = function() {};
+
+    var params = {
+        userid: userID,
+        extra: {},
+        holdMLine: 'both'
+    }
+    if (hold)
+        params.hold = true;
+    else
+        params.unhold = true;
+    peer.socket.send(params);
+    peer.peer.hold = hold;
+}
 
 function addParticipant(userID) {
     var attrs = {
@@ -84,6 +109,8 @@ function removeParticipant(userID) {
 }
 
 function displayParticipantVideo(userID) {
+    unholdSilently(userID);
+
     var videoAttrs = {
         title: userID,
         src: URL.createObjectURL(remoteStreams[userID]),
@@ -97,6 +124,7 @@ function displayParticipantVideo(userID) {
 }
 
 function removeParticipantVideo(userID) {
+    holdSilently(userID);
     getObjectByUserID('js-participant-video', userID).remove();
 }
 
