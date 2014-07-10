@@ -5,14 +5,26 @@
         <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
 		<script src="/RTCMultiConnection-v1.8.js" type="text/javascript"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
         <script src="/js/initiator.js"></script>
 	</head>
-	<body>
-        <p>Participants:</p>
-        <div id="js-participants-container"></div>
-
-        <p>Videos:</p>
-        <p><div id="js-videos-container"></div></p>
+    <body>
+        <div class="container">
+            <h1>Initiator</h1>
+            <div class="panel panel-default">
+                <div class="panel-heading">Participants</div>
+                <div class="panel-body">
+                    <div id="js-participants-container" class="btn-group" data-toggle="buttons">
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">Videos</div>
+                <div id="js-videos-container" class="panel-body">
+                </div>
+            </div>
+        </div>
 	</body>
 </html>
 

@@ -56,8 +56,9 @@ $(function () {
 
 function addParticipant(userID) {
     var attrs = {
+        'type': 'button',
         'text': userID,
-        'class': 'js-participant',
+        'class': 'js-participant btn btn-default',
         'data-id': userID
     };
     var participant = $('<button />', attrs);
