@@ -27,8 +27,8 @@ $(function () {
         console.log("New stream: ", e);
         e.stream.muted = true;
         remoteStreams[e.userid] = e.stream;
-        holdSilently(e.userid);
         enableParticipant(e.userid);
+        holdSilently(e.userid);
     };
 
     connection.onleave = function(e) {
