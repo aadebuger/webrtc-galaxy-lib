@@ -7,7 +7,7 @@ var remoteStreams = {};
 
 $(function () {
     //window.skipRTCMultiConnectionLogs = true;
-    var channelID = 'Bnei Baruch Group Video';
+    var channelID = prompt("Please enter the channel ID", 'bnei-baruch-group-video');
     connection = new RTCMultiConnection(channelID);
 
     connection.isInitiator = true;
@@ -63,22 +63,24 @@ function unholdSilently(userID) {
 function toggleHoldSilently(userID, hold) {
     var peer = connection.peers[userID];
 
-    /* A monkey-patch, see
-     * https://github.com/muaz-khan/WebRTC-Experiment/issues/244
-     * */
-    peer.fireHoldUnHoldEvents = function() {};
+    if (peer) {
+        /* A monkey-patch, see
+         * https://github.com/muaz-khan/WebRTC-Experiment/issues/244
+         * */
+        peer.fireHoldUnHoldEvents = function() {};
 
-    var params = {
-        userid: userID,
-        extra: {},
-        holdMLine: 'both'
+        var params = {
+            userid: userID,
+            extra: {},
+            holdMLine: 'both'
+        }
+        if (hold)
+            params.hold = true;
+        else
+            params.unhold = true;
+        peer.socket.send(params);
+        peer.peer.hold = hold;
     }
-    if (hold)
-        params.hold = true;
-    else
-        params.unhold = true;
-    peer.socket.send(params);
-    peer.peer.hold = hold;
 }
 
 function addParticipant(userID) {

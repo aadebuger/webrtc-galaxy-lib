@@ -3,7 +3,7 @@
 /* TODO: move all WebRTC stuff into a separate library */
 
 var connection;
-var channelID = 'Bnei Baruch Group Video';
+var channelID;
 var reconnectionInterval = 5000;
 var intervalID;
 var userID;
@@ -14,6 +14,7 @@ var sessions = {};
 
 $(function () {
     // window.skipRTCMultiConnectionLogs = true;
+    channelID = prompt("Please enter the channel ID", 'bnei-baruch-group-video');
     userID = prompt("Please enter your participant ID", 'virtual-group');
 
     initConnection();
