@@ -40,6 +40,8 @@ var params = {
     onParticipantConnected: function (participantID) {},
     onParticipantVideoReady: function (participantID) {},
     onParticipantLeft: function (participantID) {},
+    // Another initiator connected and current connection has been closed
+    onConnectionClosed: function () {}
 };
 
 var initiator = new RTCInitiator(params);
