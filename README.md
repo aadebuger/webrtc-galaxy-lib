@@ -27,6 +27,10 @@ Have fun!
 Usage
 ------
 
+```html
+<script src="/<path-to-webrtc-multi-connection>/initiator.js"></script>
+```
+
 ```javacript
 
 // Initiator
@@ -42,6 +46,10 @@ var initiator = new RTCInitiator(params);
 
 initiator.bindVideo(participantID, videoHTMLElement);
 initiator.unbindVideo(participantID);
+```
+
+```html
+<script src="/<path-to-webrtc-multi-connection>/participant.js"></script>
 ```
 
 ```javacript
