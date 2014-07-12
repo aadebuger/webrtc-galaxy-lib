@@ -6,6 +6,7 @@ var connection;
 var remoteStreams = {};
 
 $(function () {
+    "use strict";
     //window.skipRTCMultiConnectionLogs = true;
     var channelID = prompt("Please enter the channel ID", 'bnei-baruch-group-video');
     connection = new RTCMultiConnection(channelID);
@@ -36,7 +37,7 @@ $(function () {
         delete remoteStreams[e.userid];
         removeParticipant(e.userid);
         removeParticipantVideo(e.userid);
-    }
+    };
 
     connection.onRequest = function (request) {
         console.log("New request: ", request);
@@ -53,14 +54,17 @@ $(function () {
 });
 
 function holdSilently(userID) {
+    "use strict";
     toggleHoldSilently(userID, true);
 }
 
 function unholdSilently(userID) {
+    "use strict";
     toggleHoldSilently(userID, false);
 }
 
 function toggleHoldSilently(userID, hold) {
+    "use strict";
     var peer = connection.peers[userID];
 
     if (peer) {
@@ -73,7 +77,7 @@ function toggleHoldSilently(userID, hold) {
             userid: userID,
             extra: {},
             holdMLine: 'both'
-        }
+        };
         if (hold)
             params.hold = true;
         else
@@ -84,6 +88,7 @@ function toggleHoldSilently(userID, hold) {
 }
 
 function addParticipant(userID) {
+    "use strict";
     var attrs = {
         type: 'button',
         text: userID,
@@ -100,17 +105,20 @@ function addParticipant(userID) {
         else
             displayParticipantVideo(userID);
     });
-};
+}
 
 function enableParticipant(userID) {
+    "use strict";
     getObjectByUserID('js-participant', userID).prop('disabled', false);
 }
 
 function removeParticipant(userID) {
+    "use strict";
     getObjectByUserID('js-participant', userID).remove();
 }
 
 function displayParticipantVideo(userID) {
+    "use strict";
     unholdSilently(userID);
 
     var videoAttrs = {
@@ -126,10 +134,12 @@ function displayParticipantVideo(userID) {
 }
 
 function removeParticipantVideo(userID) {
+    "use strict";
     holdSilently(userID);
     getObjectByUserID('js-participant-video', userID).remove();
 }
 
 function getObjectByUserID(className, userID) {
+    "use strict";
     return $('.' + className + '[data-id="' + userID + '"]');
 }
