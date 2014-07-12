@@ -27,13 +27,15 @@ RTCInitiator = function (settings) {
     this._remoteStreams = {};
 
     // Update the object with settings
-    settings.forEach(function(item) {
+    (settings | {}).forEach(function(item) {
         this[item] = settings[item];
     });
 
     // Show WebRTC logs in debug mode
     if (this.debug)
         window.skipRTCMultiConnectionLogs = true;
+
+    this._initConnection();
 
     // Close connection on closing the browser window
     window.onbeforeunload = connection.close;
@@ -117,7 +119,7 @@ RTCInitiator.prototype = {
             OfferToReceiveVideo: true
         };
 
-        this._bindConnectionEvents(this.connection);
+        this._bindConnectionEvents();
         this.connection.open();
         this._debug("Connection established.");
     },
@@ -125,10 +127,10 @@ RTCInitiator.prototype = {
     /* Binds RTCMultiConnection events
      * @param connection: RTCMultiConnection instance
      */
-    _bindConnectionEvents: function (connection) {
+    _bindConnectionEvents: function () {
         "use strict";
 
-        connection.onstream = function(e) {
+        this.connection.onstream = function(e) {
             this._debug("New participant stream: ", e);
             e.stream.muted = true;
             this._remoteStreams[e.userid] = e.stream;
@@ -136,13 +138,13 @@ RTCInitiator.prototype = {
             this.onParticipantVideoReady(e.userid);
         };
 
-        connection.onleave = function(e) {
+        this.connection.onleave = function(e) {
             this._debug("Participant left: ", e);
             delete this._remoteStreams[e.userid];
             this.onParticipantLeft(e.userid);
         };
 
-        connection.onRequest = function (request) {
+        this.connection.onRequest = function (request) {
             this._debug("New participant request: ", request);
             this.connection.accept(request);
             this.onParticipantConnected(request.userid);
@@ -199,9 +201,7 @@ RTCInitiator.prototype = {
         }
     },
 
-    /* Log a debug message
-     *
-     * @param arguments: arguments to pass to console.log() function
+    /* Log a debug message, wraps the built-in console.log() function
      */
     _debug: function () {
         "use strict";
