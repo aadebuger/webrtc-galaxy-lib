@@ -38,17 +38,24 @@ Usage
 
 ...
 var settings = {
+    // Unique channel ID for the participants and the initiator
     channelID: 'bnei-baruch-channel',
+    // Log debug messages
     debug: true,
+    // Raised if a new participant has been connected
     onParticipantConnected: function (participantID) {...},
+    // Raised if a participant video stream is ready to play
     onParticipantVideoReady: function (participantID) {...},
+    // Raised if a participant has left
     onParticipantLeft: function (participantID) {...},
 };
 
 var initiator = new RTCInitiator(settings);
 
+// Binds a participant's video to a DOM video element
 initiator.bindVideo(participantID, domVideoElement);
 ...
+// Unbinds a participant's video
 initiator.unbindVideo(participantID);
 ...
 ```
@@ -64,15 +71,21 @@ initiator.unbindVideo(participantID);
 
 ...
 var settings = {
+    // Unique channel ID for the participants and the initiator
     channelID: 'bb-channel',
+    // Participant ID, i.e. unique user name
     participantID: 'bb-scandinavia',
+    // Log debug messages
     debug: true,
+    // Raised if the connection with the initiator has been (re)established
     onInitiatorConnected: function () {...},
+    // Raised if the connection with the initiator has been lost
     onInitiatorDisconnected: function () {...},
 };
 
 var participant = new RTCParticipant(settings);
 
+// Start broadcasting local stream and display it in the video element
 participant.startBroadcasting(domVideoElement);
 ...
 ```
