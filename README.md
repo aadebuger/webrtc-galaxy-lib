@@ -33,7 +33,7 @@ Usage
 <script src="/<path-to-webrtc-multi-connection>/initiator.js"></script>
 ```
 
-```javacript
+```javascript
 
 // Initiator
 
@@ -60,7 +60,7 @@ initiator.unbindVideo(participantID);
 <script src="/<path-to-webrtc-multi-connection>/participant.js"></script>
 ```
 
-```javacript
+```javascript
 
 // Participant
 
