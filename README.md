@@ -28,6 +28,8 @@ Usage
 ------
 
 ```html
+<!-- Download RTCMultiConnection from http://www.webrtc-experiment.com/RTCMultiConnection-v1.8.js -->
+<script src="/<path-to-javascripts>/RTCMultiConnection-v1.8.js"></script>
 <script src="/<path-to-webrtc-multi-connection>/initiator.js"></script>
 ```
 
@@ -35,37 +37,45 @@ Usage
 
 // Initiator
 
-var params = {
-    channelID: 'bb-channel',
-    onParticipantConnected: function (participantID) {},
-    onParticipantVideoReady: function (participantID) {},
-    onParticipantLeft: function (participantID) {},
-    // Another initiator connected and current connection has been closed
-    onConnectionClosed: function () {}
+...
+var settings = {
+    channelID: 'bnei-baruch-channel',
+    debug: true,
+    onParticipantConnected: function (participantID) {...},
+    onParticipantVideoReady: function (participantID) {...},
+    onParticipantLeft: function (participantID) {...},
 };
 
-var initiator = new RTCInitiator(params);
+var initiator = new RTCInitiator(settings);
 
-initiator.bindVideo(participantID, videoHTMLElement);
+initiator.bindVideo(participantID, domVideoElement);
+...
 initiator.unbindVideo(participantID);
+...
 ```
 
 ```html
+<!-- Download RTCMultiConnection from http://www.webrtc-experiment.com/RTCMultiConnection-v1.8.js -->
+<script src="/<path-to-javascripts>/RTCMultiConnection-v1.8.js"></script>
 <script src="/<path-to-webrtc-multi-connection>/participant.js"></script>
 ```
 
 ```javacript
+
 // Participant
 
-var params = {
+...
+var settings = {
     channelID: 'bb-channel',
     participantID: 'bb-scandinavia',
-    onInitiatorDisconnected: function () {},
-    onInitiatorReconnected: function () {},
+    debug: true,
+    onInitiatorConnected: function () {...},
+    onInitiatorDisconnected: function () {...},
 };
 
-var participant = new RTCParticipant(params);
+var participant = new RTCParticipant(settings);
 
-participant.startBroadcast(videoHTMLElement);
+participant.startBroadcasting(domVideoElement);
+...
 ```
 
