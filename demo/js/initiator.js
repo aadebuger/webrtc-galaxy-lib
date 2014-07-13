@@ -9,7 +9,7 @@ $(function () {
 
     var params = {
         channelID: channelID,
-        debug: false,
+        debug: true,
         onParticipantConnected: onParticipantConnected,
         onParticipantVideoReady: onParticipantVideoReady,
         onParticipantLeft: onParticipantLeft

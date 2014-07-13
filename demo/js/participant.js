@@ -4,8 +4,6 @@
 
 var connection;
 var channelID;
-var reconnectionInterval = 5000;
-var intervalID;
 var userID;
 
 var size = {width: 320, height: 240};
@@ -32,9 +30,6 @@ $(function () {
 function initConnection() {
     "use strict";
 
-    if (intervalID)
-        window.clearInterval(intervalID);
-
     if (connection) {
         connection.close();
     }
@@ -47,6 +42,7 @@ function initConnection() {
     connection.autoReDialOnFailure = true;
     connection.media.max(size.width, size.height);
     connection.bandwidth.video = 112;
+    connection.extra = {'session-name': connection.sessionid};
 
     connection.onNewSession = function(session) {
         console.log("New session: ", session);
@@ -55,10 +51,7 @@ function initConnection() {
         sessions[session.sessionid] = session;
         session.join();
 
-        if (intervalID) {
-            window.clearInterval(intervalID);
-            $('#js-status-container').hide();
-        }
+        $('#js-status-container').hide();
     };
 
     // On getting local media stream
@@ -75,7 +68,6 @@ function initConnection() {
         if (e.entireSessionClosed) {
             displayAlert("The initiator has left, trying to reconnect...");
             sessions[connection.sessionid] = undefined;
-            intervalID = window.setInterval(reconnect, reconnectionInterval);
         }
     };
 
