@@ -26,46 +26,67 @@ Have fun!
 
 Usage
 ------
+### Initiator's side
 
 ```html
+<!-- Download RTCMultiConnection from http://www.webrtc-experiment.com/RTCMultiConnection-v1.8.js -->
+<script src="/<path-to-javascripts>/RTCMultiConnection-v1.8.js"></script>
 <script src="/<path-to-webrtc-multi-connection>/initiator.js"></script>
 ```
 
-```javacript
+```javascript
 
-// Initiator
-
-var params = {
-    channelID: 'bb-channel',
-    onParticipantConnected: function (participantID) {},
-    onParticipantVideoReady: function (participantID) {},
-    onParticipantLeft: function (participantID) {},
-    // Another initiator connected and current connection has been closed
-    onConnectionClosed: function () {}
+...
+var settings = {
+    // Unique channel ID for the participants and the initiator
+    channelID: 'bnei-baruch-channel',
+    // Log debug messages
+    debug: true,
+    // Raised if a new participant has been connected
+    onParticipantConnected: function (participantID) {...},
+    // Raised if a participant video stream is ready to play
+    onParticipantVideoReady: function (participantID) {...},
+    // Raised if a participant has left
+    onParticipantLeft: function (participantID) {...},
 };
 
-var initiator = new RTCInitiator(params);
+var initiator = new RTCInitiator(settings);
 
-initiator.bindVideo(participantID, videoHTMLElement);
+// Binds a participant's video to a DOM video element
+initiator.bindVideo(participantID, domVideoElement);
+...
+// Unbinds a participant's video
 initiator.unbindVideo(participantID);
+...
 ```
+### Participant's side
 
 ```html
+<!-- Download RTCMultiConnection from http://www.webrtc-experiment.com/RTCMultiConnection-v1.8.js -->
+<script src="/<path-to-javascripts>/RTCMultiConnection-v1.8.js"></script>
 <script src="/<path-to-webrtc-multi-connection>/participant.js"></script>
 ```
 
-```javacript
-// Participant
+```javascript
 
-var params = {
+...
+var settings = {
+    // Unique channel ID for the participants and the initiator
     channelID: 'bb-channel',
+    // Participant ID, i.e. unique user name
     participantID: 'bb-scandinavia',
-    onInitiatorDisconnected: function () {},
-    onInitiatorReconnected: function () {},
+    // Log debug messages
+    debug: true,
+    // Raised if the connection with the initiator has been (re)established
+    onInitiatorConnected: function () {...},
+    // Raised if the connection with the initiator has been lost
+    onInitiatorDisconnected: function () {...},
 };
 
-var participant = new RTCParticipant(params);
+var participant = new RTCParticipant(settings);
 
-participant.startBroadcast(videoHTMLElement);
+// Start broadcasting local stream and display it in the video element
+participant.startBroadcasting(domVideoElement);
+...
 ```
 
