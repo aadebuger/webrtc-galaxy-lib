@@ -6,7 +6,7 @@
  * Example:
  *
  * ...
- * var params = {
+ * var settings = {
  *     channelID: 'bb-channel',
  *     participantID: 'bb-scandinavia',
  *     debug: true,
@@ -14,7 +14,7 @@
  *     onInitiatorDisconnected: function () {...},
  * };
  * 
- * var participant = new RTCParticipant(params);
+ * var participant = new RTCParticipant(settings);
  * 
  * participant.startBroadcasting(domVideoElement);
  * ...
@@ -76,6 +76,10 @@ RTCParticipant.prototype = {
         this._debug("Initiator disconnected");
     },
 
+    /* Start broadcasting local stream and display it in the video element
+     *
+     * @param domVideoElement: DOM video element to display the stream
+     */
     startBroadcasting: function (domVideoElement) {
         "use strict";
         this._domVideoElement = domVideoElement;

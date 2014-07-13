@@ -6,7 +6,7 @@
  * Example:
  *
  * ...
- * var params = {
+ * var settings = {
  *     channelID: 'bnei-baruch-channel',
  *     debug: true,
  *     onParticipantConnected: function (participantID) {...},
@@ -14,9 +14,9 @@
  *     onParticipantLeft: function (participantID) {...},
  * };
  * 
- * var initiator = new RTCInitiator(params);
+ * var initiator = new RTCInitiator(settings);
  * 
- * initiator.bindVideo(participantID, videoHTMLElement);
+ * initiator.bindVideo(participantID, domVideoElement);
  * ...
  * initiator.unbindVideo(participantID);
  * ...
