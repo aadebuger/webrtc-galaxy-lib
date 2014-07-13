@@ -26,6 +26,7 @@ Have fun!
 
 Usage
 ------
+### Initiator's side
 
 ```html
 <!-- Download RTCMultiConnection from http://www.webrtc-experiment.com/RTCMultiConnection-v1.8.js -->
@@ -34,8 +35,6 @@ Usage
 ```
 
 ```javascript
-
-// Initiator
 
 ...
 var settings = {
@@ -53,6 +52,7 @@ initiator.bindVideo(participantID, domVideoElement);
 initiator.unbindVideo(participantID);
 ...
 ```
+### Participant's side
 
 ```html
 <!-- Download RTCMultiConnection from http://www.webrtc-experiment.com/RTCMultiConnection-v1.8.js -->
@@ -61,8 +61,6 @@ initiator.unbindVideo(participantID);
 ```
 
 ```javascript
-
-// Participant
 
 ...
 var settings = {
