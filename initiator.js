@@ -109,7 +109,6 @@ RTCInitiator.prototype = {
         this.connection.sessionid = this._sessionID;
         this.connection.preventSSLAutoAllowed = false;
         this.connection.autoReDialOnFailure = true;
-        this.connection.extra = {'session-name': this._sessionID};
         this.connection.session = {};
 
         // We do accept remote video stream

@@ -7,18 +7,20 @@ $(function () {
 
     var channelID = prompt("Please enter the channel ID", 'bnei-baruch-group-video');
 
-    var params = {
+    var settings = {
         channelID: channelID,
         debug: true,
-        onParticipantConnected: onParticipantConnected,
-        onParticipantVideoReady: onParticipantVideoReady,
-        onParticipantLeft: onParticipantLeft
+        onParticipantConnected: _onParticipantConnected,
+        onParticipantVideoReady: _onParticipantVideoReady,
+        onParticipantLeft: _onParticipantLeft
     };
 
-    initiator = new RTCInitiator(params);
+    initiator = new RTCInitiator(settings);
 });
 
-function onParticipantConnected(participantID) {
+/* Adds a new participant toggle button and binds its click event
+ */
+function _onParticipantConnected(participantID) {
     "use strict";
 
     var attrs = {
@@ -33,29 +35,37 @@ function onParticipantConnected(participantID) {
 
     participant.click(function () {
         if ($(this).hasClass('active'))
-            removeParticipantVideo(participantID);
+            _removeParticipantVideo(participantID);
         else
-            displayParticipantVideo(participantID);
+            _displayParticipantVideo(participantID);
     });
 }
 
-function onParticipantVideoReady(participantID) {
+/* Enables participant's toggle button when his video stream is ready
+ */
+function _onParticipantVideoReady(participantID) {
     "use strict";
-    var participant = getObjectByUserID('js-participant', participantID);
+    var participant = _getObjectByUserID('js-participant', participantID);
     participant.prop('disabled', false);
 }
 
-function onParticipantLeft(participantID) {
+/* Removes participant's toggle button and video widget on leaving
+ */
+function _onParticipantLeft(participantID) {
     "use strict";
-    getObjectByUserID('js-participant', participantID).remove();
-    removeParticipantVideo(participantID);
+    _getObjectByUserID('js-participant', participantID).remove();
+    _removeParticipantVideo(participantID);
 }
 
-function displayParticipantVideo(participantID) {
+/* Displays participant's video widget and plays the stream
+ */
+function _displayParticipantVideo(participantID) {
     "use strict";
 
     var videoAttrs = {
         title: participantID,
+        width: '320px',
+        height: '240px',
         'class': 'js-participant-video',
         'data-id': participantID,
         autoplay: true
@@ -67,13 +77,17 @@ function displayParticipantVideo(participantID) {
     initiator.bindVideo(participantID, video.get(0));
 }
 
-function removeParticipantVideo(participantID) {
+/* Halts participant's video stream and removes the video widget from DOM
+ */
+function _removeParticipantVideo(participantID) {
     "use strict";
     initiator.unbindVideo(participantID);
-    getObjectByUserID('js-participant-video', participantID).remove();
+    _getObjectByUserID('js-participant-video', participantID).remove();
 }
 
-function getObjectByUserID(className, participantID) {
+/* Returns a jQuery object by its CSS class name and the data-id attribute
+ */
+function _getObjectByUserID(className, participantID) {
     "use strict";
     return $('.' + className + '[data-id="' + participantID + '"]');
 }

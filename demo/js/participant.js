@@ -1,86 +1,47 @@
 /*jshint indent:4, strict:true*/
 
-/* TODO: move all WebRTC stuff into a separate library */
-
-var connection;
-var channelID;
-var userID;
-
-var size = {width: 320, height: 240};
-var sessions = {};
-
+var participant;
 
 $(function () {
     "use strict";
-    // window.skipRTCMultiConnectionLogs = true;
-    channelID = prompt("Please enter the channel ID", 'bnei-baruch-group-video');
-    userID = prompt("Please enter your participant ID", 'virtual-group');
 
-    initConnection();
+    var channelID = prompt("Please enter the channel ID", 'bnei-baruch-group-video');
+    var participantID = prompt("Please enter your participant ID", 'virtual-group');
 
-    // Connect to existing session
-    $('#js-start-broadcasting-button').click(function() {
-        this.disabled = true;
-        connection.connect();
-    });
+    var settings = {
+        channelID: channelID,
+        participantID: participantID,
+        debug: true,
+        onInitiatorConnected: _onInitiatorConnected,
+        onInitiatorDisconnected: _onInitiatorDisconnected,
+    };
 
-    window.onbeforeunload = connection.close;
+    participant = new RTCParticipant(settings);
+
+    _bindPageEvents();
 });
 
-function initConnection() {
+/* Binds jQuery events to DOM elements on the page
+ */
+function _bindPageEvents() {
     "use strict";
-
-    if (connection) {
-        connection.close();
-    }
-
-    connection = new RTCMultiConnection(channelID);
-    connection.userid = userID;
-    connection.sessionid = 'Ighiex7atoo2ih1Ta7quesh5fiesahsh';
-    connection.isInitiator = false;
-    connection.preventSSLAutoAllowed = false;
-    connection.autoReDialOnFailure = true;
-    connection.media.max(size.width, size.height);
-    connection.bandwidth.video = 112;
-    connection.extra = {'session-name': connection.sessionid};
-
-    connection.onNewSession = function(session) {
-        console.log("New session: ", session);
-        session.session = {video: true};
-        if (sessions[session.sessionid]) return;
-        sessions[session.sessionid] = session;
-        session.join();
-
-        $('#js-status-container').hide();
-    };
-
-    // On getting local media stream
-    connection.onstream = function(e) {
-        console.log("New stream: ", e);
-        e.stream.muted = true;
-        $('video')
-            .prop('src', URL.createObjectURL(e.stream))
-            .get(0).play();
-    };
-
-    connection.onleave = function(e) {
-        console.log("User left", e);
-        if (e.entireSessionClosed) {
-            displayAlert("The initiator has left, trying to reconnect...");
-            sessions[connection.sessionid] = undefined;
-        }
-    };
-
+    $('#js-start-broadcasting-button').click(function() {
+        $(this).prop('disabled', true);
+        participant.startBroadcasting($('video').get(0));
+    });
 }
 
-function reconnect() {
+/* Hides the alert when connection with the initiator has been established
+ */
+function _onInitiatorConnected() {
     "use strict";
-    console.log("Restablishing connection...");
-    initConnection();
-    connection.connect();
+    $('#js-status-container').hide();
 }
 
-function displayAlert(message) {
+/* Shows an alert when the initiator has been disconnected
+ */
+function _onInitiatorDisconnected() {
     "use strict";
+    var message = "The initiator has left, trying to reconnect...";
     $('#js-status-container').show().text(message);
 }
