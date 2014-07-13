@@ -27,18 +27,15 @@ RTCInitiator = function (settings) {
     this._remoteStreams = {};
 
     // Update the object with settings
-    (settings | {}).forEach(function(item) {
+    for (var item in (settings ? settings: {})) {
         this[item] = settings[item];
-    });
+    }
 
     // Show WebRTC logs in debug mode
-    if (this.debug)
+    if (!this.debug)
         window.skipRTCMultiConnectionLogs = true;
 
     this._initConnection();
-
-    // Close connection on closing the browser window
-    window.onbeforeunload = connection.close;
 };
 
 
@@ -83,7 +80,8 @@ RTCInitiator.prototype = {
         "use strict";
 
         this._unholdSilently(participantID);
-        domVideoElement.src = URL.createObjectURL(this._remoteStreams[userID]);
+        var stream = this._remoteStreams[participantID];
+        domVideoElement.src = URL.createObjectURL(stream);
         domVideoElement.play();
     },
 
@@ -105,7 +103,7 @@ RTCInitiator.prototype = {
     _initConnection: function () {
         "use strict";
 
-        this.connection = new RTCMultiConnection(channelID);
+        this.connection = new RTCMultiConnection(this.channelID);
 
         this.connection.isInitiator = true;
         this.connection.sessionid = this._sessionID;
@@ -130,25 +128,30 @@ RTCInitiator.prototype = {
     _bindConnectionEvents: function () {
         "use strict";
 
+        var self = this;
+
         this.connection.onstream = function(e) {
-            this._debug("New participant stream: ", e);
+            self._debug("New participant stream: ", e);
             e.stream.muted = true;
-            this._remoteStreams[e.userid] = e.stream;
-            this._holdSilently(e.userid);
-            this.onParticipantVideoReady(e.userid);
+            self._remoteStreams[e.userid] = e.stream;
+            self._holdSilently(e.userid);
+            self.onParticipantVideoReady(e.userid);
         };
 
         this.connection.onleave = function(e) {
-            this._debug("Participant left: ", e);
-            delete this._remoteStreams[e.userid];
-            this.onParticipantLeft(e.userid);
+            self._debug("Participant left: ", e);
+            delete self._remoteStreams[e.userid];
+            self.onParticipantLeft(e.userid);
         };
 
         this.connection.onRequest = function (request) {
-            this._debug("New participant request: ", request);
-            this.connection.accept(request);
-            this.onParticipantConnected(request.userid);
+            self._debug("New participant request: ", request);
+            self.connection.accept(request);
+            self.onParticipantConnected(request.userid);
         };
+
+        // Close connection on closing the browser window
+        window.onbeforeunload = this.connection.close;
     },
 
     /* Holds a peer without raising the onhold and onmute events
@@ -166,7 +169,7 @@ RTCInitiator.prototype = {
      */
     _unholdSilently: function (participantID) {
         "use strict";
-        toggleHoldSilently(participantID, false);
+        this._toggleHoldSilently(participantID, false);
     },
 
     /* Holds or unholds the call with a participant depending on the hold argument value
@@ -186,7 +189,7 @@ RTCInitiator.prototype = {
             peer.fireHoldUnHoldEvents = function() {};
 
             var params = {
-                participantid: participantID,
+                userid: participantID,
                 extra: {},
                 holdMLine: 'both'
             };
@@ -206,6 +209,6 @@ RTCInitiator.prototype = {
     _debug: function () {
         "use strict";
         if (this.debug)
-            console.log.apply(this, arguments);
+            console.log.apply(console, arguments);
     }
 };

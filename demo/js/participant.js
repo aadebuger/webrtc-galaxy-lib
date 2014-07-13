@@ -13,6 +13,7 @@ var sessions = {};
 
 
 $(function () {
+    "use strict";
     // window.skipRTCMultiConnectionLogs = true;
     channelID = prompt("Please enter the channel ID", 'bnei-baruch-group-video');
     userID = prompt("Please enter your participant ID", 'virtual-group');
@@ -29,17 +30,18 @@ $(function () {
 });
 
 function initConnection() {
+    "use strict";
+
     if (intervalID)
         window.clearInterval(intervalID);
 
     if (connection) {
         connection.close();
-        delete connection;
     }
 
     connection = new RTCMultiConnection(channelID);
     connection.userid = userID;
-    connection.sessionid = 'awesome-session';
+    connection.sessionid = 'Ighiex7atoo2ih1Ta7quesh5fiesahsh';
     connection.isInitiator = false;
     connection.preventSSLAutoAllowed = false;
     connection.autoReDialOnFailure = true;
@@ -57,7 +59,7 @@ function initConnection() {
             window.clearInterval(intervalID);
             $('#js-status-container').hide();
         }
-    }
+    };
 
     // On getting local media stream
     connection.onstream = function(e) {
@@ -80,11 +82,13 @@ function initConnection() {
 }
 
 function reconnect() {
+    "use strict";
     console.log("Restablishing connection...");
     initConnection();
     connection.connect();
 }
 
 function displayAlert(message) {
+    "use strict";
     $('#js-status-container').show().text(message);
 }
