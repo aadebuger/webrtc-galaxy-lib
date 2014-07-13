@@ -42,6 +42,10 @@ RTCParticipant.prototype = {
      */
     channelID: 'bnei-baruch-group-video',
 
+    /* Participant ID, 'virtual-group' by default
+     */
+    participantID: 'virtual-group',
+
     /* Video width
      */
     width: 640,
@@ -53,6 +57,10 @@ RTCParticipant.prototype = {
     /* Video bandwidth
      */
     bandwidth: 450,
+
+    /* Video aspect ratio, 1.33 for 4:3
+     */
+    aspectRatio: 1.33,
 
     /* Raised if the connection with the initiator has been (re)established
      */
@@ -78,6 +86,10 @@ RTCParticipant.prototype = {
      */
     _domVideoElement: null,
 
+    /* Unique session ID
+     */
+    _sessionID: 'Ighiex7atoo2ih1Ta7quesh5fiesahsh',
+
     /* Initialize an RTCMultiConnection, for internale use only
      */
     _initConnection: function () {
@@ -86,12 +98,19 @@ RTCParticipant.prototype = {
         this.connection = new RTCMultiConnection(this.channelID);
 
         this.connection.userid = this.participantID;
-        this.connection.sessionid = 'Ighiex7atoo2ih1Ta7quesh5fiesahsh';
+        this.connection.sessionid = this._sessionID;
         this.connection.isInitiator = false;
         this.connection.preventSSLAutoAllowed = false;
         this.connection.autoReDialOnFailure = true;
         this.connection.media.max(this.width, this.height);
+        this.connection.media.minAspectRatio = this.aspectRatio;
         this.connection.bandwidth.video = this.bandwidth;
+
+        // Do not accept remote streams
+        this.connection.sdpConstraints.mandatory = {
+            OfferToReceiveAudio: false,
+            OfferToReceiveVideo: false 
+        };
 
         this._bindConnectionEvents();
     },
