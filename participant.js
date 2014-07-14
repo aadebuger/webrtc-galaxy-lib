@@ -113,7 +113,7 @@ RTCParticipant.prototype = {
         // Do not accept remote streams
         this.connection.sdpConstraints.mandatory = {
             OfferToReceiveAudio: false,
-            OfferToReceiveVideo: false 
+            OfferToReceiveVideo: false
         };
 
         this._bindConnectionEvents();
@@ -141,12 +141,12 @@ RTCParticipant.prototype = {
         this.connection.onstream = function(e) {
             self._debug("New local stream: ", e);
             e.stream.muted = true;
-            self._domVideoElement.src = URL.createObjectURL(e.stream);
+            self._domVideoElement.src = e.blobURL;
             self._domVideoElement.play();
         };
 
         this.connection.onleave = function(e) {
-            self._debug("Initiator has left: ", e);
+            self._debug("User has left: ", e);
             if (e.entireSessionClosed) {
                 self._sessions[self.connection.sessionid] = undefined;
                 self.onInitiatorDisconnected();
