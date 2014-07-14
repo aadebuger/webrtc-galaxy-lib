@@ -29,8 +29,7 @@ Usage
 ### Initiator's side
 
 ```html
-<!-- Download RTCMultiConnection from http://www.webrtc-experiment.com/RTCMultiConnection-v1.8.js -->
-<script src="/<path-to-javascripts>/RTCMultiConnection-v1.8.js"></script>
+<script src="/<path-to-webrtc-multi-connection>/3rd-party/RTCMultiConnection-v1.8-patched.js"></script>
 <script src="/<path-to-webrtc-multi-connection>/initiator.js"></script>
 ```
 
@@ -62,8 +61,7 @@ initiator.unbindVideo(participantID);
 ### Participant's side
 
 ```html
-<!-- Download RTCMultiConnection from http://www.webrtc-experiment.com/RTCMultiConnection-v1.8.js -->
-<script src="/<path-to-javascripts>/RTCMultiConnection-v1.8.js"></script>
+<script src="/<path-to-webrtc-multi-connection>/3rd-party/RTCMultiConnection-v1.8-patched.js"></script>
 <script src="/<path-to-webrtc-multi-connection>/participant.js"></script>
 ```
 
