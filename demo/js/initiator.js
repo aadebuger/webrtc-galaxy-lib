@@ -1,145 +1,93 @@
 /*jshint indent:4, strict:true*/
 
-/* TODO: move all WebRTC stuff into a separate library */
-
-var connection;
-var remoteStreams = {};
+var initiator;
 
 $(function () {
     "use strict";
-    //window.skipRTCMultiConnectionLogs = true;
+
     var channelID = prompt("Please enter the channel ID", 'bnei-baruch-group-video');
-    connection = new RTCMultiConnection(channelID);
 
-    connection.isInitiator = true;
-    connection.sessionid = 'awesome-session';
-    connection.preventSSLAutoAllowed = false;
-    connection.autoReDialOnFailure = true;
-    connection.session = {};
-
-    // We do accept remote video stream
-    connection.sdpConstraints.mandatory = {
-        OfferToReceiveAudio: false,
-        OfferToReceiveVideo: true
+    var settings = {
+        channelID: channelID,
+        debug: true,
+        onParticipantConnected: _onParticipantConnected,
+        onParticipantVideoReady: _onParticipantVideoReady,
+        onParticipantLeft: _onParticipantLeft
     };
 
-    // On getting local or remote media stream
-    connection.onstream = function(e) {
-        console.log("New stream: ", e);
-        e.stream.muted = true;
-        remoteStreams[e.userid] = e.stream;
-        enableParticipant(e.userid);
-        holdSilently(e.userid);
-    };
-
-    connection.onleave = function(e) {
-        console.log("User left: ", e);
-        delete remoteStreams[e.userid];
-        removeParticipant(e.userid);
-        removeParticipantVideo(e.userid);
-    };
-
-    connection.onRequest = function (request) {
-        console.log("New request: ", request);
-        connection.accept(request);
-        addParticipant(request.userid);
-    };
-
-    window.onbeforeunload = connection.close;
-
-    // Setup signalling channel
-    connection.open();
-    console.log("Connection opened.");
-
+    initiator = new RTCInitiator(settings);
 });
 
-function holdSilently(userID) {
+/* Adds a new participant toggle button and binds its click event
+ */
+function _onParticipantConnected(participantID) {
     "use strict";
-    toggleHoldSilently(userID, true);
-}
 
-function unholdSilently(userID) {
-    "use strict";
-    toggleHoldSilently(userID, false);
-}
-
-function toggleHoldSilently(userID, hold) {
-    "use strict";
-    var peer = connection.peers[userID];
-
-    if (peer) {
-        /* A monkey-patch, see
-         * https://github.com/muaz-khan/WebRTC-Experiment/issues/244
-         * */
-        peer.fireHoldUnHoldEvents = function() {};
-
-        var params = {
-            userid: userID,
-            extra: {},
-            holdMLine: 'both'
-        };
-        if (hold)
-            params.hold = true;
-        else
-            params.unhold = true;
-        peer.socket.send(params);
-        peer.peer.hold = hold;
-    }
-}
-
-function addParticipant(userID) {
-    "use strict";
     var attrs = {
         type: 'button',
-        text: userID,
+        text: participantID,
         'class': 'js-participant btn btn-default',
         disabled: true,
-        'data-id': userID
+        'data-id': participantID
     };
     var participant = $('<button />', attrs);
     $('#js-participants-container').append(participant);
 
     participant.click(function () {
         if ($(this).hasClass('active'))
-            removeParticipantVideo(userID);
+            _removeParticipantVideo(participantID);
         else
-            displayParticipantVideo(userID);
+            _displayParticipantVideo(participantID);
     });
 }
 
-function enableParticipant(userID) {
+/* Enables participant's toggle button when his video stream is ready
+ */
+function _onParticipantVideoReady(participantID) {
     "use strict";
-    getObjectByUserID('js-participant', userID).prop('disabled', false);
+    var participant = _getObjectByUserID('js-participant', participantID);
+    participant.prop('disabled', false);
 }
 
-function removeParticipant(userID) {
+/* Removes participant's toggle button and video widget on leaving
+ */
+function _onParticipantLeft(participantID) {
     "use strict";
-    getObjectByUserID('js-participant', userID).remove();
+    _getObjectByUserID('js-participant', participantID).remove();
+    _removeParticipantVideo(participantID);
 }
 
-function displayParticipantVideo(userID) {
+/* Displays participant's video widget and plays the stream
+ */
+function _displayParticipantVideo(participantID) {
     "use strict";
-    unholdSilently(userID);
 
     var videoAttrs = {
-        title: userID,
-        src: URL.createObjectURL(remoteStreams[userID]),
+        title: participantID,
+        width: '320px',
+        height: '240px',
         'class': 'js-participant-video',
-        'data-id': userID,
+        'data-id': participantID,
         autoplay: true
     };
+
     var video = $('<video />', videoAttrs);
     $('#js-videos-container').append(video);
-    video.get(0).play();
+
+    initiator.bindVideo(participantID, video.get(0));
 }
 
-function removeParticipantVideo(userID) {
+/* Halts participant's video stream and removes the video widget from DOM
+ */
+function _removeParticipantVideo(participantID) {
     "use strict";
-    holdSilently(userID);
-    getObjectByUserID('js-participant-video', userID).remove();
+    initiator.unbindVideo(participantID);
+    _getObjectByUserID('js-participant-video', participantID).remove();
 }
 
-function getObjectByUserID(className, userID) {
+/* Returns a jQuery object by its CSS class name and the data-id attribute
+ */
+function _getObjectByUserID(className, participantID) {
     "use strict";
-    return $('.' + className + '[data-id="' + userID + '"]');
+    return $('.' + className + '[data-id="' + participantID + '"]');
 }

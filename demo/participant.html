@@ -3,10 +3,11 @@
 	<head>
 		<title>Participant</title>
         <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
-        <script src="//www.webrtc-experiment.com/RTCMultiConnection-v1.8.js"></script>
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
         <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        <script src="//www.webrtc-experiment.com/RTCMultiConnection-v1.8.js"></script>
+        <script src="/participant.js"></script>
         <script src="/js/participant.js"></script>
 	</head>
 	<body>
@@ -18,7 +19,7 @@
                     Local video stream
                 </div>
                 <div class="panel-body">
-                    <video width="320px" height="240px" border=1 autoplay></video>
+                    <video width="320px" height="240px" autoplay></video>
                 </div>
             </div>
             <button id="js-start-broadcasting-button" class="btn btn-primary">Start broadcasting</button>

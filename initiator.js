@@ -6,7 +6,7 @@
  * Example:
  *
  * ...
- * var params = {
+ * var settings = {
  *     channelID: 'bnei-baruch-channel',
  *     debug: true,
  *     onParticipantConnected: function (participantID) {...},
@@ -14,9 +14,9 @@
  *     onParticipantLeft: function (participantID) {...},
  * };
  * 
- * var initiator = new RTCInitiator(params);
+ * var initiator = new RTCInitiator(settings);
  * 
- * initiator.bindVideo(participantID, videoHTMLElement);
+ * initiator.bindVideo(participantID, domVideoElement);
  * ...
  * initiator.unbindVideo(participantID);
  * ...
@@ -27,16 +27,15 @@ RTCInitiator = function (settings) {
     this._remoteStreams = {};
 
     // Update the object with settings
-    settings.forEach(function(item) {
+    for (var item in (settings ? settings: {})) {
         this[item] = settings[item];
-    });
+    }
 
     // Show WebRTC logs in debug mode
-    if (this.debug)
+    if (!this.debug)
         window.skipRTCMultiConnectionLogs = true;
 
-    // Close connection on closing the browser window
-    window.onbeforeunload = connection.close;
+    this._initConnection();
 };
 
 
@@ -81,7 +80,8 @@ RTCInitiator.prototype = {
         "use strict";
 
         this._unholdSilently(participantID);
-        domVideoElement.src = URL.createObjectURL(this._remoteStreams[userID]);
+        var stream = this._remoteStreams[participantID];
+        domVideoElement.src = URL.createObjectURL(stream);
         domVideoElement.play();
     },
 
@@ -103,7 +103,7 @@ RTCInitiator.prototype = {
     _initConnection: function () {
         "use strict";
 
-        this.connection = new RTCMultiConnection(channelID);
+        this.connection = new RTCMultiConnection(this.channelID);
 
         this.connection.isInitiator = true;
         this.connection.sessionid = this._sessionID;
@@ -117,7 +117,8 @@ RTCInitiator.prototype = {
             OfferToReceiveVideo: true
         };
 
-        this._bindConnectionEvents(this.connection);
+        this._bindConnectionEvents();
+
         this.connection.open();
         this._debug("Connection established.");
     },
@@ -125,28 +126,33 @@ RTCInitiator.prototype = {
     /* Binds RTCMultiConnection events
      * @param connection: RTCMultiConnection instance
      */
-    _bindConnectionEvents: function (connection) {
+    _bindConnectionEvents: function () {
         "use strict";
 
-        connection.onstream = function(e) {
-            this._debug("New participant stream: ", e);
+        var self = this;
+
+        this.connection.onstream = function(e) {
+            self._debug("New participant stream: ", e);
             e.stream.muted = true;
-            this._remoteStreams[e.userid] = e.stream;
-            this._holdSilently(e.userid);
-            this.onParticipantVideoReady(e.userid);
+            self._remoteStreams[e.userid] = e.stream;
+            self._holdSilently(e.userid);
+            self.onParticipantVideoReady(e.userid);
         };
 
-        connection.onleave = function(e) {
-            this._debug("Participant left: ", e);
-            delete this._remoteStreams[e.userid];
-            this.onParticipantLeft(e.userid);
+        this.connection.onleave = function(e) {
+            self._debug("Participant left: ", e);
+            delete self._remoteStreams[e.userid];
+            self.onParticipantLeft(e.userid);
         };
 
-        connection.onRequest = function (request) {
-            this._debug("New participant request: ", request);
-            this.connection.accept(request);
-            this.onParticipantConnected(request.userid);
+        this.connection.onRequest = function (request) {
+            self._debug("New participant request: ", request);
+            self.connection.accept(request);
+            self.onParticipantConnected(request.userid);
         };
+
+        // Close connection on closing the browser window
+        window.onbeforeunload = this.connection.close;
     },
 
     /* Holds a peer without raising the onhold and onmute events
@@ -164,7 +170,7 @@ RTCInitiator.prototype = {
      */
     _unholdSilently: function (participantID) {
         "use strict";
-        toggleHoldSilently(participantID, false);
+        this._toggleHoldSilently(participantID, false);
     },
 
     /* Holds or unholds the call with a participant depending on the hold argument value
@@ -184,7 +190,7 @@ RTCInitiator.prototype = {
             peer.fireHoldUnHoldEvents = function() {};
 
             var params = {
-                participantid: participantID,
+                userid: participantID,
                 extra: {},
                 holdMLine: 'both'
             };
@@ -199,13 +205,11 @@ RTCInitiator.prototype = {
         }
     },
 
-    /* Log a debug message
-     *
-     * @param arguments: arguments to pass to console.log() function
+    /* Log a debug message, wraps the built-in console.log() function
      */
     _debug: function () {
         "use strict";
         if (this.debug)
-            console.log.apply(this, arguments);
+            console.log.apply(console, arguments);
     }
 };
