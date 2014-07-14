@@ -62,6 +62,10 @@ RTCParticipant.prototype = {
      */
     aspectRatio: 1.33,
 
+    /* Reconnect every N milliseconds after initiator's death
+     */
+    reconnectionInterval: 3000,
+
     /* Raised if the connection with the initiator has been (re)established
      */
     onInitiatorConnected: function () {
@@ -93,6 +97,10 @@ RTCParticipant.prototype = {
     /* Unique session ID
      */
     _sessionID: 'Ighiex7atoo2ih1Ta7quesh5fiesahsh',
+
+    /* Interval object
+     */
+    _interval: null,
 
     /* Initialize an RTCMultiConnection, for internale use only
      */
@@ -133,6 +141,10 @@ RTCParticipant.prototype = {
             if (self._sessions[session.sessionid] === undefined) {
                 self._sessions[session.sessionid] = session;
                 session.join();
+
+                if (self._interval)
+                    window.clearInterval(self._interval);
+
                 self.onInitiatorConnected();
             }
         };
@@ -149,12 +161,26 @@ RTCParticipant.prototype = {
             self._debug("User has left: ", e);
             if (e.entireSessionClosed) {
                 self._sessions[self.connection.sessionid] = undefined;
+                var reconnect = function () {self._reconnect();};
+                self._interval = window.setInterval(reconnect, self.reconnectionInterval);
                 self.onInitiatorDisconnected();
             }
         };
 
         // Close connection on closing the browser window
         window.onbeforeunload = this.connection.close;
+    },
+
+    _reconnect: function() {
+        "use strict";
+        this._debug("Restablishing connection...");
+
+        this.connection.close();
+        delete this.connection;
+
+        this._initConnection();
+        this.connection.connect();
+        return true;
     },
 
     /* Log a debug message, wraps the built-in console.log() function
