@@ -62,10 +62,6 @@ RTCParticipant.prototype = {
      */
     aspectRatio: 1.33,
 
-    /* Reconnect every N milliseconds after initiator's death
-     */
-    reconnectionInterval: 3000,
-
     /* Raised if the connection with the initiator has been (re)established
      */
     onInitiatorConnected: function () {
@@ -98,10 +94,6 @@ RTCParticipant.prototype = {
      */
     _sessionID: 'Ighiex7atoo2ih1Ta7quesh5fiesahsh',
 
-    /* Interval object
-     */
-    _interval: null,
-
     /* Initialize an RTCMultiConnection, for internale use only
      */
     _initConnection: function () {
@@ -114,17 +106,19 @@ RTCParticipant.prototype = {
         this.connection.isInitiator = false;
         this.connection.preventSSLAutoAllowed = false;
         this.connection.autoReDialOnFailure = true;
-        this.connection.media.max(this.width, this.height);
-        this.connection.media.minAspectRatio = this.aspectRatio;
         this.connection.bandwidth.video = this.bandwidth;
+        this.connection.direction = 'one-way';
 
-        // Do not accept remote streams
-        this.connection.sdpConstraints.mandatory = {
-            OfferToReceiveAudio: false,
-            OfferToReceiveVideo: false
+        this.connection.mediaConstraints.mandatory = {
+            maxWidth: this.width,
+            maxHeight: this.height,
+            minAspectRatio: this.aspectRatio
         };
 
         this._bindConnectionEvents();
+    },
+
+    _setMediaConstraints: function () {
     },
 
     /* Binds RTCMultiConnection events
@@ -137,14 +131,9 @@ RTCParticipant.prototype = {
 
         this.connection.onNewSession = function(session) {
             self._debug("New session with initiator: ", session);
-            session.session = {video: true};
             if (self._sessions[session.sessionid] === undefined) {
                 self._sessions[session.sessionid] = session;
-                session.join();
-
-                if (self._interval)
-                    window.clearInterval(self._interval);
-
+                session.join({video: true});
                 self.onInitiatorConnected();
             }
         };
@@ -161,26 +150,12 @@ RTCParticipant.prototype = {
             self._debug("User has left: ", e);
             if (e.entireSessionClosed) {
                 self._sessions[self.connection.sessionid] = undefined;
-                var reconnect = function () {self._reconnect();};
-                self._interval = window.setInterval(reconnect, self.reconnectionInterval);
                 self.onInitiatorDisconnected();
             }
         };
 
         // Close connection on closing the browser window
         window.onbeforeunload = this.connection.close;
-    },
-
-    _reconnect: function() {
-        "use strict";
-        this._debug("Restablishing connection...");
-
-        this.connection.close();
-        delete this.connection;
-
-        this._initConnection();
-        this.connection.connect();
-        return true;
     },
 
     /* Log a debug message, wraps the built-in console.log() function
