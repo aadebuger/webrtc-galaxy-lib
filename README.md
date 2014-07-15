@@ -29,7 +29,7 @@ Usage
 ### Initiator's side
 
 ```html
-<script src="/<path-to-webrtc-multi-connection>/3rd-party/RTCMultiConnection-v1.8-patched.js"></script>
+<script src="/<path-to-webrtc-multi-connection>/3rd-party/RTCMultiConnection-v1.8-experimental.js"></script>
 <script src="/<path-to-webrtc-multi-connection>/initiator.js"></script>
 ```
 
@@ -61,7 +61,7 @@ initiator.unbindVideo(participantID);
 ### Participant's side
 
 ```html
-<script src="/<path-to-webrtc-multi-connection>/3rd-party/RTCMultiConnection-v1.8-patched.js"></script>
+<script src="/<path-to-webrtc-multi-connection>/3rd-party/RTCMultiConnection-v1.8-experimental.js"></script>
 <script src="/<path-to-webrtc-multi-connection>/participant.js"></script>
 ```
 
