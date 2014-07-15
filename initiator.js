@@ -12,6 +12,7 @@
  *     onParticipantConnected: function (participantID) {...},
  *     onParticipantVideoReady: function (participantID) {...},
  *     onParticipantLeft: function (participantID) {...},
+ *     onConnectionClosed: function () {...}
  * };
  * 
  * var initiator = new RTCInitiator(settings);
@@ -71,6 +72,15 @@ RTCInitiator.prototype = {
         this._debug("Participant's left: ", participantID);
     },
 
+    /* Raised if a participant has left
+     *
+     * @param participantID: participant ID string
+     */
+    onConnectionClosed: function () {
+        "use strict";
+        this._debug("Connection has been closed because another initiator connected");
+    },
+
     /* Binds a participant's video to a DOM video element
      *
      * @param participantID: participant ID string
@@ -104,16 +114,24 @@ RTCInitiator.prototype = {
 
         this.connection = new RTCMultiConnection(this.channelID);
 
+        this._created = Date.now();
         this.connection.isInitiator = true;
         this.connection.sessionid = this._sessionID;
         this.connection.preventSSLAutoAllowed = false;
         this.connection.autoReDialOnFailure = true;
         this.connection.session = {oneway: true};
 
+        this.connection.sdpConstraints.mandatory = {
+            OfferToReceiveAudio: false,
+            OfferToReceiveVideo: true,
+        };
+
         this._bindConnectionEvents();
 
         this.connection.open();
         this._debug("Connection established.");
+
+        this._closeOtherInitiators();
     },
 
     /* Binds RTCMultiConnection events
@@ -123,6 +141,10 @@ RTCInitiator.prototype = {
         "use strict";
 
         var self = this;
+
+        this.connection.onopen = function(e) {
+            self._debug("Session opened: ", e);
+        };
 
         this.connection.onstream = function(e) {
             self._debug("New participant stream: ", e);
@@ -142,6 +164,18 @@ RTCInitiator.prototype = {
             self._debug("New participant request: ", request);
             self.connection.accept(request);
             self.onParticipantConnected(request.userid);
+        };
+
+        this.connection.onCustomMessage = function (message) {
+            self._debug("New custom message :", message);
+            if (message.action === 'close-connection' &&
+                    message.timestamp > self._created) {
+                // A monkey-patch to fix session re-initiation tries
+                self.connection.join = function () {};
+                self.connection.close();
+                self._debug("Connection closed because another initiator connected");
+                self.onConnectionClosed();
+            }
         };
 
         // Close connection on closing the browser window
@@ -196,6 +230,17 @@ RTCInitiator.prototype = {
             peer.socket.send(params);
             peer.peer.hold = hold;
         }
+    },
+
+    /* Sends a custom message for other initiators to close their connections
+     */
+    _closeOtherInitiators: function () {
+        "use strict";
+
+        this.connection.sendCustomMessage({
+            action: 'close-connection',
+            timestamp: this._created
+        });
     },
 
     /* Log a debug message, wraps the built-in console.log() function

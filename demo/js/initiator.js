@@ -12,7 +12,8 @@ $(function () {
         debug: true,
         onParticipantConnected: _onParticipantConnected,
         onParticipantVideoReady: _onParticipantVideoReady,
-        onParticipantLeft: _onParticipantLeft
+        onParticipantLeft: _onParticipantLeft,
+        onConnectionClosed: _onConnectionClosed
     };
 
     initiator = new RTCInitiator(settings);
@@ -55,6 +56,14 @@ function _onParticipantLeft(participantID) {
     "use strict";
     _getObjectByUserID('js-participant', participantID).remove();
     _removeParticipantVideo(participantID);
+}
+
+/* Displays an alert on closed connection
+ */
+function _onConnectionClosed() {
+    "use strict";
+    var message = "Connection closed because another initator has connected";
+    $('#js-status-container').show().text(message);
 }
 
 /* Displays participant's video widget and plays the stream

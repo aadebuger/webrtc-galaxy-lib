@@ -47,6 +47,9 @@ var settings = {
     onParticipantVideoReady: function (participantID) {...},
     // Raised if a participant has left
     onParticipantLeft: function (participantID) {...},
+    // Raised if current connection has been closed
+    // because another initiator showed up
+    onConnectionClosed: function () {...}
 };
 
 var initiator = new RTCInitiator(settings);
