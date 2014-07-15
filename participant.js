@@ -106,17 +106,19 @@ RTCParticipant.prototype = {
         this.connection.isInitiator = false;
         this.connection.preventSSLAutoAllowed = false;
         this.connection.autoReDialOnFailure = true;
-        this.connection.media.max(this.width, this.height);
-        this.connection.media.minAspectRatio = this.aspectRatio;
         this.connection.bandwidth.video = this.bandwidth;
+        this.connection.direction = 'one-way';
 
-        // Do not accept remote streams
-        this.connection.sdpConstraints.mandatory = {
-            OfferToReceiveAudio: false,
-            OfferToReceiveVideo: false 
+        this.connection.mediaConstraints.mandatory = {
+            maxWidth: this.width,
+            maxHeight: this.height,
+            minAspectRatio: this.aspectRatio
         };
 
         this._bindConnectionEvents();
+    },
+
+    _setMediaConstraints: function () {
     },
 
     /* Binds RTCMultiConnection events
@@ -129,10 +131,9 @@ RTCParticipant.prototype = {
 
         this.connection.onNewSession = function(session) {
             self._debug("New session with initiator: ", session);
-            session.session = {video: true};
             if (self._sessions[session.sessionid] === undefined) {
                 self._sessions[session.sessionid] = session;
-                session.join();
+                session.join({video: true});
                 self.onInitiatorConnected();
             }
         };
@@ -141,12 +142,12 @@ RTCParticipant.prototype = {
         this.connection.onstream = function(e) {
             self._debug("New local stream: ", e);
             e.stream.muted = true;
-            self._domVideoElement.src = URL.createObjectURL(e.stream);
+            self._domVideoElement.src = e.blobURL;
             self._domVideoElement.play();
         };
 
         this.connection.onleave = function(e) {
-            self._debug("Initiator has left: ", e);
+            self._debug("User has left: ", e);
             if (e.entireSessionClosed) {
                 self._sessions[self.connection.sessionid] = undefined;
                 self.onInitiatorDisconnected();

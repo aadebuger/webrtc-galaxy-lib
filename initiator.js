@@ -24,7 +24,7 @@
 RTCInitiator = function (settings) {
     "use strict";
 
-    this._remoteStreams = {};
+    this._blobURLs = {};
 
     // Update the object with settings
     for (var item in (settings ? settings: {})) {
@@ -80,8 +80,7 @@ RTCInitiator.prototype = {
         "use strict";
 
         this._unholdSilently(participantID);
-        var stream = this._remoteStreams[participantID];
-        domVideoElement.src = URL.createObjectURL(stream);
+        domVideoElement.src = this._blobURLs[participantID];
         domVideoElement.play();
     },
 
@@ -109,13 +108,7 @@ RTCInitiator.prototype = {
         this.connection.sessionid = this._sessionID;
         this.connection.preventSSLAutoAllowed = false;
         this.connection.autoReDialOnFailure = true;
-        this.connection.session = {};
-
-        // We do accept remote video stream
-        this.connection.sdpConstraints.mandatory = {
-            OfferToReceiveAudio: false,
-            OfferToReceiveVideo: true
-        };
+        this.connection.session = {oneway: true};
 
         this._bindConnectionEvents();
 
@@ -134,14 +127,14 @@ RTCInitiator.prototype = {
         this.connection.onstream = function(e) {
             self._debug("New participant stream: ", e);
             e.stream.muted = true;
-            self._remoteStreams[e.userid] = e.stream;
+            self._blobURLs[e.userid] = e.blobURL;
             self._holdSilently(e.userid);
             self.onParticipantVideoReady(e.userid);
         };
 
         this.connection.onleave = function(e) {
             self._debug("Participant left: ", e);
-            delete self._remoteStreams[e.userid];
+            delete self._blobURLs[e.userid];
             self.onParticipantLeft(e.userid);
         };
 
