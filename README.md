@@ -1,5 +1,5 @@
-webrtc-multi-connection
-=======================
+webrtc-galaxy-ui
+================
 
 WebRTC wrapper to enable many one-direction connections.
 
