@@ -89,4 +89,3 @@ var participant = new RTCParticipant(settings);
 participant.startBroadcasting(domVideoElement);
 ...
 ```
-
