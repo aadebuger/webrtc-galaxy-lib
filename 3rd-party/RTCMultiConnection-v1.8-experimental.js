@@ -2643,7 +2643,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
         connection.sendCustomMessage = function (message) {
             if (!defaultSocket) {
                 return setTimeout(function () {
-                    connection.sendMessage(message);
+                    connection.sendCustomMessage(message);
                 }, 1000);
             }
 

@@ -1,6 +1,5 @@
-webrtc-galaxy-ui
-================
-
+WebRTC Galaxy library
+=======================
 WebRTC wrapper to enable many one-direction connections.
 
 Launch demo
@@ -47,6 +46,9 @@ var settings = {
     onParticipantVideoReady: function (participantID) {...},
     // Raised if a participant has left
     onParticipantLeft: function (participantID) {...},
+    // Raised if current connection has been closed
+    // because another initiator showed up
+    onConnectionClosed: function () {...}
 };
 
 var initiator = new RTCInitiator(settings);
@@ -70,7 +72,7 @@ initiator.unbindVideo(participantID);
 ...
 var settings = {
     // Unique channel ID for the participants and the initiator
-    channelID: 'bb-channel',
+    channelID: 'bnei-baruch-channel',
     // Participant ID, i.e. unique user name
     participantID: 'bb-scandinavia',
     // Log debug messages
@@ -87,4 +89,3 @@ var participant = new RTCParticipant(settings);
 participant.startBroadcasting(domVideoElement);
 ...
 ```
-
