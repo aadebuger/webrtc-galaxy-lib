@@ -168,6 +168,7 @@ RTCInitiator.prototype = {
 
         this.connection.onCustomMessage = function (message) {
             self._debug("New custom message :", message);
+            // Got a request to close the connection from a new initiator
             if (message.action === 'close-connection' &&
                     message.timestamp > self._created) {
                 // A monkey-patch to fix session re-initiation tries

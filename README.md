@@ -1,6 +1,5 @@
-webrtc-multi-connection
+WebRTC Galaxy library
 =======================
-
 WebRTC wrapper to enable many one-direction connections.
 
 Launch demo
@@ -73,7 +72,7 @@ initiator.unbindVideo(participantID);
 ...
 var settings = {
     // Unique channel ID for the participants and the initiator
-    channelID: 'bb-channel',
+    channelID: 'bnei-baruch-channel',
     // Participant ID, i.e. unique user name
     participantID: 'bb-scandinavia',
     // Log debug messages
