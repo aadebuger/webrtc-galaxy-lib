@@ -15,12 +15,14 @@ module.exports = (config) ->
 
     # list of files / patterns to load in the browser
     files: [
-      'test/*.coffee'
+      '*.coffee',
+      'spec/*_spec.coffee'
     ]
 
 
     # list of files to exclude
     exclude: [
+        'karma.conf.coffee'
     ]
 
 
@@ -61,7 +63,14 @@ module.exports = (config) ->
 
     # start these browsers
     # available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome', 'Firefox']
+    browsers: ['Chrome_with_fake_media_stream']
+
+
+    # launch browsers with custom flags
+    customLaunchers:
+        Chrome_with_fake_media_stream:
+            base: 'Chrome'
+            flags: ['--use-fake-device-for-media-stream']
 
 
     # Continuous Integration mode
