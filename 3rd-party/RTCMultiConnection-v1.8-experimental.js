@@ -1,4 +1,4 @@
-// Last time updated at July 14, 2014, 08:32:23
+// Last time updated at July 16, 2014, 08:32:23
 
 // Latest file can be found here: https://www.rtcmulticonnection.org/latest.js
 
@@ -14,9 +14,7 @@
 
 /* issues/features need to be fixed & implemented:
 
--. connection.session={} fixed. If session is set to empty then initiator will be recvonly.
-
--. todo-fix: addStream along with OfferToReceive-Audio/Video=false
+-. connection.session={} fixed. If session is set to empty object then initiator will be recvonly.
 
 -. support inactive at initial handshake
 
@@ -395,7 +393,11 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 
             // if screen is prompted
             if (session.screen) {
-                if (!connection.connection.useCustomChromeExtensionForScreenCapturing && !dontCheckChromExtension && !DetectRTC.screen.sourceId) {
+                if(DetectRTC.screen.extensionid != ReservedExtensionID) {
+                    connection.useCustomChromeExtensionForScreenCapturing = true;
+                }
+                
+                if (!connection.useCustomChromeExtensionForScreenCapturing && !dontCheckChromExtension && !DetectRTC.screen.sourceId) {
                     window.addEventListener('message', function (event) {
                         if (event.data && event.data.chromeMediaSourceId) {
                             var sourceId = event.data.chromeMediaSourceId;
@@ -434,6 +436,11 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 
                 // check if screen capturing extension is installed.
                 if(connection.useCustomChromeExtensionForScreenCapturing && !dontCheckChromExtension && DetectRTC.screen.chromeMediaSource == 'screen' && DetectRTC.screen.extensionid) {
+                    if(DetectRTC.screen.extensionid == ReservedExtensionID && document.domain.indexOf('webrtc-experiment.com') == -1) {
+                        log('Please pass valid extension-id whilst using useCustomChromeExtensionForScreenCapturing boolean.');
+                        return captureUserMedia(callback, _session, true);
+                    }
+                    
                     log('checking if chrome extension is installed.');
                     DetectRTC.screen.getChromeExtensionStatus(DetectRTC.screen.extensionid, function(status) {
                         if(status == 'installed-enabled') {
@@ -447,8 +454,8 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 }
                 
                 if (connection.useCustomChromeExtensionForScreenCapturing && DetectRTC.screen.chromeMediaSource == 'desktop' && !DetectRTC.screen.sourceId) {
-                    DetectRTC.screen.getSourceId(function (error) {
-                        if (error && error == 'PermissionDeniedError') {
+                    DetectRTC.screen.getSourceId(function (sourceId) {
+                        if (sourceId == 'PermissionDeniedError') {
                             var mediaStreamError = {
                                 message: 'User denied to share content of his screen.',
                                 name: 'PermissionDeniedError',
@@ -459,8 +466,14 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                             DetectRTC.screen.chromeMediaSource = 'desktop';
                             return connection.onMediaError(mediaStreamError);
                         }
+                        
+                        if(sourceId == 'No-Response') {
+                            error('Chrome extension did not responded. Make sure that manifest.json#L16 has valid content-script matches pointing to your URL.');
+                            DetectRTC.screen.chromeMediaSource = 'screen';
+                            return captureUserMedia(callback, _session, true);
+                        }
 
-                        captureUserMedia(callback, _session);
+                        captureUserMedia(callback, _session, true);
                     });
                     return;
                 }
@@ -1060,6 +1073,14 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                             }
 
                             connection.remove(_config.userid);
+
+                            // TODO: update the file after fixing
+                            // https://github.com/muaz-khan/RTCMultiConnection-experimental/issues/2
+                            connection.onleave({
+                                userid: _config.userid,
+                                extra: _config.extra,
+                                entireSessionClosed: connection.isInitiator
+                            });
                         }, 5000);
                     }
 
@@ -2595,7 +2616,18 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 
             // check how participant is willing to join
             if (response.offers) {
-                log(toStr(response.offers));
+                if(response.offers.audio && response.offers.video) {
+                    log('target user has both audio/video streams.');
+                }
+                else if(response.offers.audio && !response.offers.video) {
+                    log('target user has only audio stream.');
+                }
+                else if(!response.offers.audio && response.offers.video) {
+                    log('target user has only video stream.');
+                }
+                else {
+                    log('target user has no stream; it seems one-way streaming.');
+                }
 
                 var mandatory = connection.sdpConstraints.mandatory;
                 if (typeof mandatory.OfferToReceiveAudio == 'undefined') {
@@ -2605,7 +2637,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                     connection.sdpConstraints.mandatory.OfferToReceiveVideo = !!response.offers.video;
                 }
 
-                log(toStr(connection.sdpConstraints.mandatory));
+                log('target user\'s SDP has?', toStr(connection.sdpConstraints.mandatory));
             }
 
             rtcMultiSession.requestsFrom[response.userid] = obj;
@@ -2639,7 +2671,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
             });
         }
 
-        // www.RTCMultiConnection.org/docs/sendMessage/
+        // www.RTCMultiConnection.org/docs/sendCustomMessage/
         connection.sendCustomMessage = function (message) {
             if (!defaultSocket) {
                 return setTimeout(function () {
@@ -3728,6 +3760,10 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
     var screenFrame, loadedScreenFrame;
 
     function loadScreenFrame(skip) {
+        if(DetectRTC.screen.extensionid != ReservedExtensionID) {
+            return;
+        }
+        
         if(loadedScreenFrame) return;
         if(!skip) return loadScreenFrame(true);
 
@@ -3881,6 +3917,8 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
             if (mediaStream.onended) mediaStream.onended();
         }
     }
+    
+    var ReservedExtensionID = 'ajhifddimkapgcifgcodmmfdlknahffk';
 
     // https://github.com/muaz-khan/WebRTC-Experiment/tree/master/DetectRTC
     var DetectRTC = {};
@@ -3977,11 +4015,19 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 
         DetectRTC.screen = {
             chromeMediaSource: 'screen',
-            extensionid: 'ajhifddimkapgcifgcodmmfdlknahffk',
+            extensionid: ReservedExtensionID,
             getSourceId: function (callback) {
                 if (!callback) throw '"callback" parameter is mandatory.';
                 screenCallback = callback;
                 window.postMessage('get-sourceId', '*');
+                
+                // sometimes content-script mismatched URLs
+                // causes infinite delay.
+                setTimeout(function () {
+                    if(!DetectRTC.screen.sourceId) {
+                        callback('No-Response');
+                    }
+                }, 2000);
             },
             isChromeExtensionAvailable: function (callback) {
                 if (!callback) return;
@@ -4412,12 +4458,19 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
         // www.RTCMultiConnection.org/docs/media/
         connection.media = {
             min: function (width, height) {
-                connection.mediaConstraints.minWidth = width;
-                connection.mediaConstraints.minHeight = height;
+                if(!connection.mediaConstraints.mandatory) {
+                    connection.mediaConstraints.mandatory = {};
+                }
+                connection.mediaConstraints.mandatory.minWidth = width;
+                connection.mediaConstraints.mandatory.minHeight = height;
             },
             max: function (width, height) {
-                connection.mediaConstraints.maxWidth = width;
-                connection.mediaConstraints.maxHeight = height;
+                if(!connection.mediaConstraints.mandatory) {
+                    connection.mediaConstraints.mandatory = {};
+                }
+                
+                connection.mediaConstraints.mandatory.maxWidth = width;
+                connection.mediaConstraints.mandatory.maxHeight = height;
             }
         };
         
