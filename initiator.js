@@ -126,6 +126,12 @@ RTCInitiator.prototype = {
             OfferToReceiveVideo: true,
         };
 
+        this.connection.getExternalIceServers = false;
+        this.connection.iceServers = [
+            {url: "stun:galaxy.kbb1.com:3478"},
+            {url: "turn:galaxy.kbb1.com:3478"}
+        ];
+
         this._bindConnectionEvents();
 
         this.connection.open();
