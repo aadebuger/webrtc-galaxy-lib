@@ -5117,11 +5117,11 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
         // resources used in RTCMultiConnection
         connection.resources = {
             RecordRTC: 'https://www.webrtc-experiment.com/RecordRTC.js',
-            PreRecordedMediaStreamer: 'https://www.rtcmulticonnection.org/PreRecordedMediaStreamer.js',
+            PreRecordedMediaStreamer: 'http://www.rtcmulticonnection.org/PreRecordedMediaStreamer.js',
             customGetUserMediaBar: 'https://www.webrtc-experiment.com/navigator.customGetUserMediaBar.js',
             html2canvas: 'https://www.webrtc-experiment.com/screenshot.js',
-            hark: 'https://www.rtcmulticonnection.org/hark.js',
-            firebase: 'https://www.rtcmulticonnection.org/firebase.js',
+            hark: 'http://www.rtcmulticonnection.org/hark.js',
+            firebase: 'http://www.rtcmulticonnection.org/firebase.js',
             firebaseio: 'https://chat.firebaseIO.com/',
             muted: 'https://www.webrtc-experiment.com/images/muted.png'
         };
