@@ -5121,7 +5121,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
             customGetUserMediaBar: 'https://www.webrtc-experiment.com/navigator.customGetUserMediaBar.js',
             html2canvas: 'https://www.webrtc-experiment.com/screenshot.js',
             hark: 'http://www.rtcmulticonnection.org/hark.js',
-            firebase: 'http://www.rtcmulticonnection.org/firebase.js',
+            firebase: 'https://cdn.firebase.com/v0/firebase.js',
             firebaseio: 'https://chat.firebaseIO.com/',
             muted: 'https://www.webrtc-experiment.com/images/muted.png'
         };
